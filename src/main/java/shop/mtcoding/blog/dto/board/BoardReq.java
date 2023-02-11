@@ -12,4 +12,10 @@ public class BoardReq {
         private String content;
     }
 
+    @Setter
+    @Getter
+    public static class BoardDeleteReqDto {
+        private int id;
+    }
+
 }
