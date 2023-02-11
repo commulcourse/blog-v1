@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class BoardResp {
+
     @Setter
     @Getter
     public static class BoardMainRespDto {
@@ -11,4 +12,15 @@ public class BoardResp {
         private String title;
         private String username;
     }
+
+    @Setter
+    @Getter
+    public static class BoardDetailRespDto {
+        private int id;
+        private String title;
+        private String content;
+        private int userId;
+        private String username;
+    }
+
 }
