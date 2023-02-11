@@ -33,7 +33,7 @@ public class BoardController {
     @Autowired
     private BoardRepository boardRepository;
 
-    @DeleteMapping
+    @DeleteMapping("/board/{id}")
     public @ResponseBody ResponseEntity<?> delete(@PathVariable int id) {
         User principal = (User) session.getAttribute("principal");
         if (principal == null) {

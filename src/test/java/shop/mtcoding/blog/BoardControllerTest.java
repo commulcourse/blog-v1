@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,6 +30,7 @@ import shop.mtcoding.blog.dto.board.BoardResp;
 import shop.mtcoding.blog.dto.board.BoardResp.BoardDetailRespDto;
 import shop.mtcoding.blog.model.User;
 
+@Transactional // 메서드 실행후 연결되는어 test가 되는것을 막아준다. rollback 해준다.//auto_increment 초기화 해줌.
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 public class BoardControllerTest {
@@ -40,7 +42,7 @@ public class BoardControllerTest {
 
     private MockHttpSession mockSession;
 
-    @BeforeEach // Test 메서드 실행 직전 마다에 호출됨
+    @BeforeEach
     public void setUp() {
         User user = new User();
         user.setId(1);
@@ -48,6 +50,7 @@ public class BoardControllerTest {
         user.setPassword("1234");
         user.setEmail("ssar@nate.com");
         user.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+
         mockSession = new MockHttpSession();
         mockSession.setAttribute("principal", user);
     }
@@ -60,14 +63,8 @@ public class BoardControllerTest {
         ResultActions resultActions = mvc.perform(
                 delete("/board/" + id).session(mockSession));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
-        System.out.println("테스트 : " + responseBody);
+        System.out.println("delete_test : " + responseBody);
 
-        /**
-         * jsonPath
-         * 최상위 : $
-         * 객체탐색 : 닷(.)
-         * 배열 : [0]
-         */
         // then
         resultActions.andExpect(jsonPath("$.code").value(1));
         resultActions.andExpect(status().isOk());
@@ -83,7 +80,7 @@ public class BoardControllerTest {
         Map<String, Object> map = resultActions.andReturn().getModelAndView().getModel();
         BoardDetailRespDto dto = (BoardDetailRespDto) map.get("dto");
         String model = om.writeValueAsString(dto);
-        System.out.println("테스트 : " + model);
+        System.out.println("detail : " + model);
         // then
         resultActions.andExpect(status().isOk());
         assertThat(dto.getUsername()).isEqualTo("ssar");
@@ -100,7 +97,7 @@ public class BoardControllerTest {
         Map<String, Object> map = resultActions.andReturn().getModelAndView().getModel();
         List<BoardResp.BoardMainRespDto> dtos = (List<BoardResp.BoardMainRespDto>) map.get("dtos");
         String model = om.writeValueAsString(dtos);
-        System.out.println("테스트 : " + model);
+        System.out.println("main_test : " + model);
         // then
         resultActions.andExpect(status().isOk());
         assertThat(dtos.size()).isEqualTo(6);
@@ -122,6 +119,7 @@ public class BoardControllerTest {
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                         .session(mockSession));
+        System.out.println("save_test : ");
         // then
         resultActions.andExpect(status().is3xxRedirection());
     }
