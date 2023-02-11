@@ -1,10 +1,14 @@
 package shop.mtcoding.blog;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +21,10 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import shop.mtcoding.blog.dto.board.BoardResp;
+import shop.mtcoding.blog.dto.board.BoardResp.BoardDetailRespDto;
 import shop.mtcoding.blog.model.User;
 
 @AutoConfigureMockMvc
@@ -25,6 +33,9 @@ public class BoardControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private ObjectMapper om;
 
     private MockHttpSession mockSession;
 
@@ -42,15 +53,58 @@ public class BoardControllerTest {
     }
 
     @Test
-    public void save_test() throws Exception {
+    public void detail_test() throws Exception {
         // given
-        String requestBody = "username=ssar&password=1234&email=ssar@nate.com";
+        int id = 1;
 
         // when
-        ResultActions resultActions = mvc.perform(post("/join").content(requestBody)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
+        ResultActions resultActions = mvc.perform(
+                get("/board/" + id));
+        Map<String, Object> map = resultActions.andReturn().getModelAndView().getModel();
+        BoardDetailRespDto dto = (BoardDetailRespDto) map.get("dto");
+        String model = om.writeValueAsString(dto);
+        System.out.println("테스트 : " + model);
 
+        // then
+        resultActions.andExpect(status().isOk());
+        assertThat(dto.getUsername()).isEqualTo("ssar");
+        assertThat(dto.getUserId()).isEqualTo(1);
+        assertThat(dto.getTitle()).isEqualTo("1번째 제목");
+    }
+
+    @Test
+    public void main_test() throws Exception {
+        // given
+        // when
+        ResultActions resultActions = mvc.perform(
+                get("/"));
+        Map<String, Object> map = resultActions.andReturn().getModelAndView().getModel();
+        List<BoardResp.BoardMainRespDto> dtos = (List<BoardResp.BoardMainRespDto>) map.get("dtos");
+        String model = om.writeValueAsString(dtos);
+        System.out.println("테스트 : " + model);
+        // then
+        resultActions.andExpect(status().isOk());
+        assertThat(dtos.size()).isEqualTo(6);
+        assertThat(dtos.get(0).getUsername()).isEqualTo("ssar");
+        assertThat(dtos.get(0).getTitle()).isEqualTo("1번째 제목");
+    }
+
+    @Test
+    public void save_test() throws Exception {
+        // given
+        String title = "";
+        for (int i = 0; i < 99; i++) {
+            title += "가";
+        }
+        String requestBody = "title=" + title + "&content=내용1";
+        // when
+        ResultActions resultActions = mvc.perform(
+                post("/board")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .session(mockSession));
         // then
         resultActions.andExpect(status().is3xxRedirection());
     }
+
 }
