@@ -1,9 +1,10 @@
 package shop.mtcoding.blog;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.sql.Timestamp;
@@ -31,7 +32,6 @@ import shop.mtcoding.blog.model.User;
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 public class BoardControllerTest {
-
     @Autowired
     private MockMvc mvc;
 
@@ -40,7 +40,7 @@ public class BoardControllerTest {
 
     private MockHttpSession mockSession;
 
-    @BeforeEach
+    @BeforeEach // Test 메서드 실행 직전 마다에 호출됨
     public void setUp() {
         User user = new User();
         user.setId(1);
@@ -48,7 +48,6 @@ public class BoardControllerTest {
         user.setPassword("1234");
         user.setEmail("ssar@nate.com");
         user.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
-
         mockSession = new MockHttpSession();
         mockSession.setAttribute("principal", user);
     }
@@ -57,14 +56,20 @@ public class BoardControllerTest {
     public void delete_test() throws Exception {
         // given
         int id = 1;
-
         // when
         ResultActions resultActions = mvc.perform(
                 delete("/board/" + id).session(mockSession));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("테스트 : " + responseBody);
 
+        /**
+         * jsonPath
+         * 최상위 : $
+         * 객체탐색 : 닷(.)
+         * 배열 : [0]
+         */
         // then
+        resultActions.andExpect(jsonPath("$.code").value(1));
         resultActions.andExpect(status().isOk());
     }
 
@@ -72,7 +77,6 @@ public class BoardControllerTest {
     public void detail_test() throws Exception {
         // given
         int id = 1;
-
         // when
         ResultActions resultActions = mvc.perform(
                 get("/board/" + id));
@@ -80,7 +84,6 @@ public class BoardControllerTest {
         BoardDetailRespDto dto = (BoardDetailRespDto) map.get("dto");
         String model = om.writeValueAsString(dto);
         System.out.println("테스트 : " + model);
-
         // then
         resultActions.andExpect(status().isOk());
         assertThat(dto.getUsername()).isEqualTo("ssar");
@@ -122,5 +125,4 @@ public class BoardControllerTest {
         // then
         resultActions.andExpect(status().is3xxRedirection());
     }
-
 }
