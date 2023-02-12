@@ -21,6 +21,7 @@ import shop.mtcoding.blog.dto.board.BoardReq.BoardSaveReqDto;
 import shop.mtcoding.blog.dto.board.BoardReq.BoardUpdateReqDto;
 import shop.mtcoding.blog.handler.ex.CustomApiException;
 import shop.mtcoding.blog.handler.ex.CustomException;
+import shop.mtcoding.blog.model.Board;
 import shop.mtcoding.blog.model.BoardRepository;
 import shop.mtcoding.blog.model.User;
 import shop.mtcoding.blog.service.BoardService;
@@ -104,7 +105,19 @@ public class BoardController {
     }
 
     @GetMapping("/board/{id}/updateForm")
-    public String updateForm(@PathVariable int id) {
+    public String updateForm(@PathVariable int id, Model model) {
+        User principal = (User) session.getAttribute("principal");
+        if (principal == null) {
+            throw new CustomException("인증이 되지 않았습니다", HttpStatus.UNAUTHORIZED);
+        }
+        Board boardPS = boardRepository.findById(id);
+        if (boardPS == null) {
+            throw new CustomException("없는 게시글을 수정할 수 없습니다");
+        }
+        if (boardPS.getUserId() != principal.getId()) {
+            throw new CustomException("게시글을 수정할 권한이 없습니다", HttpStatus.FORBIDDEN);
+        }
+        model.addAttribute("board", boardPS);
         return "board/updateForm";
     }
 }

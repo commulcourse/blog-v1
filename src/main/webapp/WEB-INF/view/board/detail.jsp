@@ -19,7 +19,6 @@
                 <i>${dto.username}</i>
                 </span>
 
-                <i id="heart" class="fa-regular fa-heart my-xl my-cursor" value="no"></i>
             </div>
 
             <div>
@@ -29,10 +28,10 @@
             <div>
                 <div>${dto.content}</div>
             </div>
-            <hr />
-            <i id="heart" class="fa-regular fa-heart fa-lg"></i>
+            <hr/>
+                <i id="heart" class="fa-regular fa-heart fa-lg"></i>
 
-            <div class="card" mt-3>
+            <div class="card mt-3">
                 <form>
                     <div class="card-body">
                         <textarea id="reply-content" class="form-control" rows="1"></textarea>

@@ -14,12 +14,6 @@ public class BoardReq {
 
     @Setter
     @Getter
-    public static class BoardDeleteReqDto {
-        private int id;
-    }
-
-    @Setter
-    @Getter
     public static class BoardUpdateReqDto {
         private String title;
         private String content;

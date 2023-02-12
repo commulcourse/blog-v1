@@ -11,6 +11,7 @@ import shop.mtcoding.blog.util.Script;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
+
     // NullPointException <- RuntimeException
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<?> customException(CustomException e) {
